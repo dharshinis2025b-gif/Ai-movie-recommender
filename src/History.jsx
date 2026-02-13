@@ -12,9 +12,9 @@ function History() {
     setHistory(res.data);
   };
 
-  const deleteHistory = async (id) => {
+  const removeHistory = async (id) => {
     await axios.delete(`${API}/history/${id}`);
-    fetchHistory();
+    fetchHistory(); // refresh list
   };
 
   useEffect(() => {
@@ -22,17 +22,45 @@ function History() {
   }, []);
 
   return (
-    <div style={{ padding: 30, background:"#141414", color:"white", minHeight:"100vh" }}>
-      <Link to="/" style={{ color:"red" }}>⬅ Back</Link>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#141414",
+        color: "white",
+        padding: "30px",
+      }}
+    >
+      <Link to="/" style={{ color: "#e50914" }}>
+        ⬅ Back
+      </Link>
 
       <h2>🧠 Search History</h2>
 
-      {history.map((h) => (
-        <div key={h.id} style={{ marginBottom:10 }}>
-          <span>{h.mood}</span>
+      {history.length === 0 && <p>No history yet.</p>}
+
+      {history.map((item) => (
+        <div
+          key={item.id}
+          style={{
+            background: "#222",
+            padding: "10px",
+            marginBottom: "10px",
+            borderRadius: "8px",
+          }}
+        >
+          <span>{item.mood}</span>
+
           <button
-            onClick={() => deleteHistory(h.id)}
-            style={{ marginLeft:10 }}
+            onClick={() => removeHistory(item.id)}
+            style={{
+              marginLeft: "15px",
+              background: "#e50914",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
           >
             ❌ Remove
           </button>

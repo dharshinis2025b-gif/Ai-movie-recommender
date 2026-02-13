@@ -224,6 +224,16 @@ app.get("/history", (req, res) => {
     res.json(rows);
   });
 });
+// DELETE SINGLE HISTORY ITEM
+app.delete("/history/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.run("DELETE FROM searches WHERE id = ?", [id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json({ message: "History removed ❌" });
+  });
+});
 
 /* =========================
    DELETE FAVOURITE
