@@ -1,54 +1,29 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+
+const API = "https://ai-movie-recommender-2-nb3t.onrender.com";
 
 function History() {
   const [history, setHistory] = useState([]);
 
-  // Fetch search history from backend
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/history")
-      .then((res) => setHistory(res.data))
-      .catch((err) => console.log(err));
+    axios.get(`${API}/history`).then((res) => {
+      setHistory(res.data);
+    });
   }, []);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#141414",
-        color: "white",
-        padding: "30px",
-        fontFamily: "Arial",
-      }}
-    >
-      {/* Back Button */}
-      <a
-        href="/"
-        style={{
-          color: "white",
-          textDecoration: "none",
-          backgroundColor: "#333",
-          padding: "8px 12px",
-          borderRadius: "6px",
-          display: "inline-block",
-          marginBottom: "20px",
-        }}
-      >
-        ⬅ Back to Home
-      </a>
+    <div style={{ padding: "30px", color: "white", background: "#141414", minHeight: "100vh" }}>
+      <Link to="/" style={{ color: "red" }}>⬅ Back</Link>
 
-      <h1 style={{ color: "#e50914" }}>🧠 Search History</h1>
+      <h2>🧠 Search History</h2>
 
-      {history.length === 0 ? (
-        <p>No searches yet.</p>
-      ) : (
-        <ul style={{ marginTop: "20px", lineHeight: "2" }}>
-          {history.map((item) => (
-            <li key={item.id}>Mood: {item.mood}</li>
-          ))}
-        </ul>
-      )}
+      {history.length === 0 && <p>No searches yet.</p>}
+
+      {history.map((h) => (
+        <p key={h.id}>{h.mood}</p>
+      ))}
     </div>
   );
 }

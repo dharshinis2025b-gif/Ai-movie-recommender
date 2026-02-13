@@ -1,6 +1,5 @@
 services:
   - type: web
-    name: ai-movie-recommender-frontend
     env: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
@@ -8,3 +7,4 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
