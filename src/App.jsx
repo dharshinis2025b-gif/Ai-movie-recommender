@@ -16,7 +16,7 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://ai-movie-recommender-2.onrender.com/recommend", {
+      const res = await axios.post("https://ai-movie-recommender-2-nb3t.onrender.com/recommend", {
         mood,
       });
 
@@ -38,7 +38,7 @@ function App() {
   // ---------------------
   const saveMovie = async (movie) => {
     try {
-      await axios.post("https://ai-movie-recommender-2.onrender.com/save", {
+      await axios.post("https://ai-movie-recommender-2-nb3t.onrender.com/save", {
         title: movie.title,
         poster: movie.poster_path,
         genre: genre,
