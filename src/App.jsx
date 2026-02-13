@@ -1,5 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+
+const API = "https://ai-movie-recommender-2-nb3t.onrender.com";
 
 function App() {
   const [mood, setMood] = useState("");
@@ -16,18 +19,12 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://ai-movie-recommender-2-nb3t.onrender.com/recommend", {
-        mood,
-      });
+      const res = await axios.post(`${API}/recommend`, { mood });
 
       setGenre(res.data.genre);
       setMovies(res.data.movies);
     } catch (error) {
-      if (error.response && error.response.data.error) {
-        alert(error.response.data.error);
-      } else {
-        alert("Something went wrong");
-      }
+      alert("Server waking up... please try again 🙂");
     }
 
     setLoading(false);
@@ -38,15 +35,15 @@ function App() {
   // ---------------------
   const saveMovie = async (movie) => {
     try {
-      await axios.post("https://ai-movie-recommender-2-nb3t.onrender.com/save", {
+      await axios.post(`${API}/save`, {
         title: movie.title,
         poster: movie.poster_path,
-        genre: genre,
-        mood: mood,
+        genre,
+        mood,
       });
 
       alert("Movie saved ❤️");
-    } catch (err) {
+    } catch {
       alert("Failed to save movie");
     }
   };
@@ -62,14 +59,18 @@ function App() {
       }}
     >
       {/* TITLE */}
-      <h1 style={{ color: "#e50914", marginBottom: "10px" }}>
+      <h1 style={{ color: "#e50914", marginBottom: "5px" }}>
         🎬 AI Movie Recommender
       </h1>
 
-      {/* NAVIGATION BUTTONS */}
+      <p style={{ color: "#aaa", marginTop: 0 }}>
+        Find movies that match your mood instantly
+      </p>
+
+      {/* NAVIGATION */}
       <div style={{ marginBottom: "20px" }}>
-        <a
-          href="/saved"
+        <Link
+          to="/saved"
           style={{
             color: "white",
             textDecoration: "none",
@@ -79,11 +80,11 @@ function App() {
             marginRight: "10px",
           }}
         >
-          ❤️ View Saved Movies
-        </a>
+          ❤️ Saved Movies
+        </Link>
 
-        <a
-          href="/history"
+        <Link
+          to="/history"
           style={{
             color: "white",
             textDecoration: "none",
@@ -92,11 +93,11 @@ function App() {
             borderRadius: "6px",
           }}
         >
-          🧠 View Search History
-        </a>
+          🧠 History
+        </Link>
       </div>
 
-      {/* INPUT SECTION */}
+      {/* INPUT */}
       <div style={{ marginBottom: "20px" }}>
         <input
           type="text"
@@ -128,12 +129,12 @@ function App() {
       </div>
 
       {/* LOADING */}
-      {loading && <p>Thinking... 🤖</p>}
+      {loading && <p>Finding perfect movies for your mood... 🎬✨</p>}
 
       {/* GENRE */}
       {genre && <h2>Suggested Genre: {genre}</h2>}
 
-      {/* MOVIE CARDS */}
+      {/* MOVIES */}
       <div
         style={{
           display: "flex",
@@ -147,18 +148,22 @@ function App() {
             key={movie.id}
             style={{
               width: "200px",
-              backgroundColor: "#222",
-              borderRadius: "10px",
+              backgroundColor: "#1c1c1c",
+              borderRadius: "12px",
               overflow: "hidden",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
-              transition: "transform 0.3s",
+              boxShadow: "0 6px 14px rgba(0,0,0,0.6)",
+              transition: "transform 0.3s, box-shadow 0.3s",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "scale(1.05)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "scale(1)")
-            }
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.05)";
+              e.currentTarget.style.boxShadow =
+                "0 10px 20px rgba(0,0,0,0.8)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow =
+                "0 6px 14px rgba(0,0,0,0.6)";
+            }}
           >
             {movie.poster_path && (
               <img
