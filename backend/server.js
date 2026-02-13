@@ -134,7 +134,7 @@ app.post("/recommend", async (req, res) => {
       return {
         ...movie,
         moodMatch: Math.max(
-  55,
+  75,
   Math.min(
     100,
     Math.floor(
