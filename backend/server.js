@@ -69,7 +69,7 @@ app.post("/recommend", async (req, res) => {
     let genre = null;
 
     // Mood → Genre mapping
-    if (text.includes("happy") || text.includes("fun") || text.includes("joy"))
+    if (text.includes("happy") || text.includes("bored") || text.includes("joy"))
       genre = "Comedy";
     else if (
       text.includes("sad") ||
@@ -133,13 +133,17 @@ app.post("/recommend", async (req, res) => {
     const movies = tmdbRes.data.results.slice(0, 30).map((movie) => {
       return {
         ...movie,
-        moodMatch: Math.min(
-          100,
-          Math.floor(
-            movie.vote_average * 10 * 0.7 +
-              Math.min(movie.popularity, 100) * 0.3
-          )
-        ),
+        moodMatch: Math.max(
+  55,
+  Math.min(
+    100,
+    Math.floor(
+      movie.vote_average * 10 * 0.7 +
+      Math.min(movie.popularity, 100) * 0.3
+    )
+  )
+),
+
       };
     });
 
