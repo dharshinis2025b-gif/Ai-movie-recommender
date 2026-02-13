@@ -7,7 +7,13 @@ const sqlite3 = require("sqlite3").verbose();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "DELETE"],
+  })
+);
+
 app.use(express.json());
 
 // ---------------------
@@ -62,35 +68,52 @@ app.post("/recommend", async (req, res) => {
     const text = mood.toLowerCase();
     let genre = null;
 
-    if (text.includes("happy") || text.includes("bored") || text.includes("joy"))
-  genre = "Comedy";
-
-else if (text.includes("sad") || text.includes("emotional") || text.includes("cry"))
-  genre = "Drama";
-
-else if (text.includes("scared") || text.includes("dark") || text.includes("fear"))
-  genre = "Horror";
-
-else if (text.includes("love") || text.includes("romantic") || text.includes("crush"))
-  genre = "Romance";
-
-else if (text.includes("adventurous") || text.includes("excited") || text.includes("thrill"))
-  genre = "Action";
-
-else if (text.includes("space") || text.includes("future") || text.includes("sci"))
-  genre = "Sci-Fi";
-
-else if (text.includes("relaxed") || text.includes("calm") || text.includes("peace"))
-  genre = "Animation";
-
-else if (text.includes("mystery") || text.includes("detective"))
-  genre = "Thriller";
-
+    // Mood → Genre mapping
+    if (text.includes("happy") || text.includes("fun") || text.includes("joy"))
+      genre = "Comedy";
+    else if (
+      text.includes("sad") ||
+      text.includes("emotional") ||
+      text.includes("cry")
+    )
+      genre = "Drama";
+    else if (
+      text.includes("scared") ||
+      text.includes("dark") ||
+      text.includes("fear")
+    )
+      genre = "Horror";
+    else if (
+      text.includes("love") ||
+      text.includes("romantic") ||
+      text.includes("crush")
+    )
+      genre = "Romance";
+    else if (
+      text.includes("adventurous") ||
+      text.includes("excited") ||
+      text.includes("thrill")
+    )
+      genre = "Action";
+    else if (
+      text.includes("space") ||
+      text.includes("future") ||
+      text.includes("sci")
+    )
+      genre = "Sci-Fi";
+    else if (
+      text.includes("relaxed") ||
+      text.includes("calm") ||
+      text.includes("peace")
+    )
+      genre = "Animation";
+    else if (text.includes("mystery") || text.includes("detective"))
+      genre = "Thriller";
 
     if (!genre) {
       return res.status(400).json({
         error:
-          "Use moods like sad, bored, love, happy, adventurous, scared,mystery,calm,relax,excited...",
+          "Use moods like sad, fun, love, happy, adventurous, scared...",
       });
     }
 
@@ -106,10 +129,24 @@ else if (text.includes("mystery") || text.includes("detective"))
       }
     );
 
+    // Add mood match percentage
+    const movies = tmdbRes.data.results.slice(0, 30).map((movie) => {
+      return {
+        ...movie,
+        moodMatch: Math.min(
+          100,
+          Math.floor(
+            movie.vote_average * 10 * 0.7 +
+              Math.min(movie.popularity, 100) * 0.3
+          )
+        ),
+      };
+    });
+
     res.json({
       mood,
       genre,
-      movies: tmdbRes.data.results.slice(0, 5),
+      movies,
     });
   } catch (err) {
     console.log(err.message);
@@ -143,28 +180,6 @@ app.get("/favourites", (req, res) => {
     res.json(rows);
   });
 });
-// ---------------------
-// GET SEARCH HISTORY
-// ---------------------
-app.get("/history", (req, res) => {
-  db.all("SELECT * FROM searches ORDER BY id DESC", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-
-    res.json(rows);
-  });
-});
-//-----------------------
-// DELETE HISTORY ITEM
-//-----------------------
-app.delete("/history/:id", (req, res) => {
-  const { id } = req.params;
-
-  db.run("DELETE FROM searches WHERE id = ?", [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-
-    res.json({ message: "History removed ❌" });
-  });
-});
 
 // ---------------------
 // DELETE FAVOURITE
@@ -176,6 +191,30 @@ app.delete("/favourites/:id", (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
 
     res.json({ message: "Movie removed ❌" });
+  });
+});
+
+// ---------------------
+// GET HISTORY
+// ---------------------
+app.get("/history", (req, res) => {
+  db.all("SELECT * FROM searches ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json(rows);
+  });
+});
+
+// ---------------------
+// DELETE HISTORY
+// ---------------------
+app.delete("/history/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.run("DELETE FROM searches WHERE id = ?", [id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json({ message: "History removed ❌" });
   });
 });
 

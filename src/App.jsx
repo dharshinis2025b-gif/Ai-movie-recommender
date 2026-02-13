@@ -24,7 +24,11 @@ function App() {
       setGenre(res.data.genre);
       setMovies(res.data.movies);
     } catch (error) {
-      alert("Server waking up... please try again 🙂");
+      if (error.response && error.response.data.error) {
+        alert(error.response.data.error);
+      } else {
+        alert("Server waking up... please try again 🙂");
+      }
     }
 
     setLoading(false);
@@ -134,7 +138,7 @@ function App() {
       {/* GENRE */}
       {genre && <h2>Suggested Genre: {genre}</h2>}
 
-      {/* MOVIES */}
+      {/* MOVIE CARDS */}
       <div
         style={{
           display: "flex",
@@ -174,13 +178,28 @@ function App() {
             )}
 
             <div style={{ padding: "10px" }}>
-              <h4 style={{ margin: "0 0 10px 0" }}>{movie.title}</h4>
+              <h4 style={{ margin: "0 0 8px 0" }}>{movie.title}</h4>
+
+              {/* RATING */}
+              <p style={{ margin: "4px 0", color: "#ffd700" }}>
+                ⭐ Rating: {movie.vote_average?.toFixed(1)}
+              </p>
+
+              {/* MOOD MATCH */}
+              <p style={{ margin: "4px 0", color: "#00ff99" }}>
+                🎯 Mood Match: {movie.moodMatch}%
+              </p>
 
               <a
                 href={`https://www.youtube.com/results?search_query=${movie.title} trailer`}
                 target="_blank"
                 rel="noreferrer"
-                style={{ color: "#e50914", textDecoration: "none" }}
+                style={{
+                  color: "#e50914",
+                  textDecoration: "none",
+                  display: "inline-block",
+                  marginTop: "5px",
+                }}
               >
                 ▶ Watch Trailer
               </a>
