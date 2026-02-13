@@ -22,19 +22,63 @@ function SavedMovies() {
   }, []);
 
   return (
-    <div style={{ padding: "30px", color: "white", background: "#141414", minHeight: "100vh" }}>
-      <Link to="/" style={{ color: "red" }}>⬅ Back</Link>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#141414",
+        color: "white",
+        padding: "30px",
+      }}
+    >
+      <Link to="/" style={{ color: "#e50914" }}>
+        ⬅ Back
+      </Link>
 
       <h2>❤️ Saved Movies</h2>
 
       {movies.length === 0 && <p>No saved movies yet.</p>}
 
-      {movies.map((movie) => (
-        <div key={movie.id} style={{ marginBottom: "15px" }}>
-          <p>{movie.title}</p>
-          <button onClick={() => removeMovie(movie.id)}>❌ Remove</button>
-        </div>
-      ))}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+        {movies.map((movie) => (
+          <div
+            key={movie.id}
+            style={{
+              width: "200px",
+              backgroundColor: "#222",
+              borderRadius: "10px",
+              overflow: "hidden",
+              paddingBottom: "10px",
+            }}
+          >
+            {/* POSTER */}
+            {movie.poster && (
+              <img
+                src={`https://image.tmdb.org/t/p/w500${movie.poster}`}
+                alt={movie.title}
+                style={{ width: "100%" }}
+              />
+            )}
+
+            <div style={{ padding: "10px" }}>
+              <h4>{movie.title}</h4>
+
+              <button
+                onClick={() => removeMovie(movie.id)}
+                style={{
+                  padding: "6px 10px",
+                  backgroundColor: "#e50914",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                ❌ Remove
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

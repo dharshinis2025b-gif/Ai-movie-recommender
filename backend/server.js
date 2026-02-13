@@ -62,21 +62,35 @@ app.post("/recommend", async (req, res) => {
     const text = mood.toLowerCase();
     let genre = null;
 
-    if (text.includes("happy") || text.includes("fun")) genre = "Comedy";
-    else if (text.includes("sad")) genre = "Drama";
-    else if (text.includes("scared") || text.includes("dark"))
-      genre = "Horror";
-    else if (text.includes("love") || text.includes("romantic"))
-      genre = "Romance";
-    else if (text.includes("adventurous") || text.includes("excited"))
-      genre = "Action";
-    else if (text.includes("space") || text.includes("future"))
-      genre = "Sci-Fi";
+    if (text.includes("happy") || text.includes("bored") || text.includes("joy"))
+  genre = "Comedy";
+
+else if (text.includes("sad") || text.includes("emotional") || text.includes("cry"))
+  genre = "Drama";
+
+else if (text.includes("scared") || text.includes("dark") || text.includes("fear"))
+  genre = "Horror";
+
+else if (text.includes("love") || text.includes("romantic") || text.includes("crush"))
+  genre = "Romance";
+
+else if (text.includes("adventurous") || text.includes("excited") || text.includes("thrill"))
+  genre = "Action";
+
+else if (text.includes("space") || text.includes("future") || text.includes("sci"))
+  genre = "Sci-Fi";
+
+else if (text.includes("relaxed") || text.includes("calm") || text.includes("peace"))
+  genre = "Animation";
+
+else if (text.includes("mystery") || text.includes("detective"))
+  genre = "Thriller";
+
 
     if (!genre) {
       return res.status(400).json({
         error:
-          "Use moods like sad, fun, love, happy, adventurous, scared...",
+          "Use moods like sad, bored, love, happy, adventurous, scared,mystery,calm,relax,excited...",
       });
     }
 
@@ -137,6 +151,18 @@ app.get("/history", (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
 
     res.json(rows);
+  });
+});
+//-----------------------
+// DELETE HISTORY ITEM
+//-----------------------
+app.delete("/history/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.run("DELETE FROM searches WHERE id = ?", [id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json({ message: "History removed ❌" });
   });
 });
 

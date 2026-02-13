@@ -7,22 +7,36 @@ const API = "https://ai-movie-recommender-2-nb3t.onrender.com";
 function History() {
   const [history, setHistory] = useState([]);
 
+  const fetchHistory = async () => {
+    const res = await axios.get(`${API}/history`);
+    setHistory(res.data);
+  };
+
+  const deleteHistory = async (id) => {
+    await axios.delete(`${API}/history/${id}`);
+    fetchHistory();
+  };
+
   useEffect(() => {
-    axios.get(`${API}/history`).then((res) => {
-      setHistory(res.data);
-    });
+    fetchHistory();
   }, []);
 
   return (
-    <div style={{ padding: "30px", color: "white", background: "#141414", minHeight: "100vh" }}>
-      <Link to="/" style={{ color: "red" }}>⬅ Back</Link>
+    <div style={{ padding: 30, background:"#141414", color:"white", minHeight:"100vh" }}>
+      <Link to="/" style={{ color:"red" }}>⬅ Back</Link>
 
       <h2>🧠 Search History</h2>
 
-      {history.length === 0 && <p>No searches yet.</p>}
-
       {history.map((h) => (
-        <p key={h.id}>{h.mood}</p>
+        <div key={h.id} style={{ marginBottom:10 }}>
+          <span>{h.mood}</span>
+          <button
+            onClick={() => deleteHistory(h.id)}
+            style={{ marginLeft:10 }}
+          >
+            ❌ Remove
+          </button>
+        </div>
       ))}
     </div>
   );
