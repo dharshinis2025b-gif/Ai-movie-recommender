@@ -179,7 +179,7 @@ app.post("/recommend", async (req, res) => {
     res.json({
       mood,
       genre,
-      movies: tmdbRes.data.results.slice(0, 20), // 20 movies
+      movies: tmdbRes.data.results.slice(0, 10), // 10 movies
     });
 
   } catch (err) {
