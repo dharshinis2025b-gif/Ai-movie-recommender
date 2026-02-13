@@ -186,9 +186,7 @@ function App() {
               </p>
 
               {/* MOOD MATCH */}
-              <p style={{ margin: "4px 0", color: "#00ff99" }}>
-                🎯 Mood Match: {movie.moodMatch}%
-              </p>
+              
 
               <a
                 href={`https://www.youtube.com/results?search_query=${movie.title} trailer`}
