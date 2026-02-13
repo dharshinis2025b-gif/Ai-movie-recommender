@@ -7,24 +7,18 @@ const sqlite3 = require("sqlite3").verbose();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "DELETE"],
-  })
-);
-
+app.use(cors());
 app.use(express.json());
 
-// ---------------------
-// SQLITE DATABASE
-// ---------------------
+/* ==========================
+   SQLITE DATABASE
+========================== */
 const db = new sqlite3.Database("./movies.db", (err) => {
   if (err) console.log(err);
   else console.log("SQLite connected ✅");
 });
 
-// Create tables
+// Create favourites table
 db.run(`
   CREATE TABLE IF NOT EXISTS favourites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,6 +29,7 @@ db.run(`
   )
 `);
 
+// Create search history table
 db.run(`
   CREATE TABLE IF NOT EXISTS searches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,83 +37,56 @@ db.run(`
   )
 `);
 
-// ---------------------
-// TEST ROUTE
-// ---------------------
+/* ==========================
+   TEST ROUTE
+========================== */
 app.get("/", (req, res) => {
   res.json({ message: "Backend running ✅" });
 });
 
-// ---------------------
-// RECOMMEND ROUTE
-// ---------------------
+/* ==========================
+   RECOMMEND MOVIES
+========================== */
 app.post("/recommend", async (req, res) => {
   try {
     const { mood } = req.body;
 
     if (!mood) {
-      return res
-        .status(400)
-        .json({ error: "Use moods like sad, fun, love, happy..." });
+      return res.status(400).json({
+        error: "Use moods like sad, fun, love, happy, adventurous..."
+      });
     }
 
-    // Save search history
+    // Save mood in history
     db.run("INSERT INTO searches(mood) VALUES(?)", [mood]);
 
     const text = mood.toLowerCase();
     let genre = null;
 
     // Mood → Genre mapping
-    if (text.includes("happy") || text.includes("bored") || text.includes("joy"))
+    if (text.includes("happy") || text.includes("fun"))
       genre = "Comedy";
-    else if (
-      text.includes("sad") ||
-      text.includes("emotional") ||
-      text.includes("cry")
-    )
+    else if (text.includes("sad"))
       genre = "Drama";
-    else if (
-      text.includes("scared") ||
-      text.includes("dark") ||
-      text.includes("fear")
-    )
+    else if (text.includes("scared") || text.includes("dark"))
       genre = "Horror";
-    else if (
-      text.includes("love") ||
-      text.includes("romantic") ||
-      text.includes("crush")
-    )
+    else if (text.includes("love") || text.includes("romantic"))
       genre = "Romance";
-    else if (
-      text.includes("adventurous") ||
-      text.includes("excited") ||
-      text.includes("thrill")
-    )
+    else if (text.includes("adventurous") || text.includes("excited"))
       genre = "Action";
-    else if (
-      text.includes("space") ||
-      text.includes("future") ||
-      text.includes("sci")
-    )
+    else if (text.includes("space") || text.includes("future"))
       genre = "Sci-Fi";
-    else if (
-      text.includes("relaxed") ||
-      text.includes("calm") ||
-      text.includes("peace")
-    )
-      genre = "Animation";
-    else if (text.includes("mystery") || text.includes("detective"))
-      genre = "Thriller";
 
     if (!genre) {
       return res.status(400).json({
         error:
-          "Use moods like sad, fun, love, happy, adventurous, scared...",
+          "Use moods like sad, fun, love, happy, adventurous, scared..."
       });
     }
 
     console.log("Selected genre:", genre);
 
+    // Fetch movies from TMDB
     const tmdbRes = await axios.get(
       "https://api.themoviedb.org/3/search/movie",
       {
@@ -129,38 +97,21 @@ app.post("/recommend", async (req, res) => {
       }
     );
 
-    // Add mood match percentage
-    const movies = tmdbRes.data.results.slice(0, 30).map((movie) => {
-      return {
-        ...movie,
-        moodMatch: Math.max(
-  75,
-  Math.min(
-    100,
-    Math.floor(
-      movie.vote_average * 10 * 0.7 +
-      Math.min(movie.popularity, 100) * 0.3
-    )
-  )
-),
-
-      };
-    });
-
     res.json({
       mood,
       genre,
-      movies,
+      movies: tmdbRes.data.results.slice(0, 30), // 30 movies
     });
+
   } catch (err) {
     console.log(err.message);
     res.status(500).json({ error: "Something went wrong" });
   }
 });
 
-// ---------------------
-// SAVE FAVOURITE
-// ---------------------
+/* ==========================
+   SAVE FAVOURITE
+========================== */
 app.post("/save", (req, res) => {
   const { title, poster, genre, mood } = req.body;
 
@@ -175,19 +126,20 @@ app.post("/save", (req, res) => {
   );
 });
 
-// ---------------------
-// GET FAVOURITES
-// ---------------------
+/* ==========================
+   GET FAVOURITES
+========================== */
 app.get("/favourites", (req, res) => {
   db.all("SELECT * FROM favourites", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
+
     res.json(rows);
   });
 });
 
-// ---------------------
-// DELETE FAVOURITE
-// ---------------------
+/* ==========================
+   DELETE FAVOURITE
+========================== */
 app.delete("/favourites/:id", (req, res) => {
   const { id } = req.params;
 
@@ -198,9 +150,9 @@ app.delete("/favourites/:id", (req, res) => {
   });
 });
 
-// ---------------------
-// GET HISTORY
-// ---------------------
+/* ==========================
+   SEARCH HISTORY
+========================== */
 app.get("/history", (req, res) => {
   db.all("SELECT * FROM searches ORDER BY id DESC", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -209,22 +161,20 @@ app.get("/history", (req, res) => {
   });
 });
 
-// ---------------------
-// DELETE HISTORY
-// ---------------------
-app.delete("/history/:id", (req, res) => {
-  const { id } = req.params;
-
-  db.run("DELETE FROM searches WHERE id = ?", [id], function (err) {
+/* ==========================
+   CLEAR HISTORY
+========================== */
+app.delete("/history", (req, res) => {
+  db.run("DELETE FROM searches", [], (err) => {
     if (err) return res.status(500).json({ error: err.message });
 
-    res.json({ message: "History removed ❌" });
+    res.json({ message: "History cleared 🧹" });
   });
 });
 
-// ---------------------
-// START SERVER
-// ---------------------
+/* ==========================
+   START SERVER
+========================== */
 app.listen(5000, () => {
   console.log("Backend running on port 5000");
 });
