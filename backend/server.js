@@ -29,12 +29,21 @@ CREATE TABLE IF NOT EXISTS favourites(
 `);
 
 db.run(`
-CREATE TABLE IF NOT EXISTS searches(
- id INTEGER PRIMARY KEY AUTOINCREMENT,
- mood TEXT,
- industry TEXT
+CREATE TABLE IF NOT EXISTS searches (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  mood TEXT,
+  industry TEXT
 )
 `);
+
+// add column if not exists (SAFE MIGRATION)
+db.run(`
+ALTER TABLE searches ADD COLUMN industry TEXT
+`, (err) => {
+  if (err) {
+    console.log("industry column already exists ✅");
+  }
+});
 
 /* ===============================
    LANGUAGE MAP (INDUSTRIES)
